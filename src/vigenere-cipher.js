@@ -20,14 +20,80 @@ const { NotImplementedError } = require('../extensions/index.js');
  * 
  */
 class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+
+  constructor(direct = true) {
+    this.direct = direct;
+    this.alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    this.square = [];
   }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
+  generateSquare() {
+    for (let i = 0; i < this.alphabet.length; i++) {
+      let row = this.alphabet.slice(i);
+      row += this.alphabet.slice(0, i);
+      this.square.push(row);
+    }
   }
+  getSquare() {
+    return this.square;
+  }
+  encrypt(message, key) {
+    if (message === undefined || key === undefined) {
+      throw Error('Incorrect arguments!');
+    }
+
+    let encryptMessage = "";
+    let newKey = this.repeatString(key, message);
+    this.generateSquare();
+    let k = 0;
+    for (let it = 0; it < message.length; it++) {
+      let i = this.alphabet.indexOf(message[it].toUpperCase());
+      let j = this.alphabet.indexOf(newKey[k].toUpperCase());
+      if (i === -1) {
+        encryptMessage += message[it];
+        k--;
+      } else {
+        encryptMessage += this.square[i][j];
+      }
+      k++;
+    }
+    if (!this.direct) {
+      return encryptMessage.split('').reverse().join('');
+    }
+    return encryptMessage;
+  }
+  decrypt(message, key) {
+
+    if (message === undefined || key === undefined) {
+      throw Error('Incorrect arguments!');
+    }
+    let decryptMessage = "";
+    let newKey = this.repeatString(key, message);
+    this.generateSquare();
+    let k = 0;
+    for (let it = 0; it < message.length; it++) {
+      let i = this.alphabet.indexOf(newKey[k].toUpperCase());
+      let j = this.square[i].indexOf(message[it].toUpperCase());
+      if (j === -1) {
+        decryptMessage += message[it];
+        k--;
+      } else {
+        decryptMessage += this.alphabet[j];
+      }
+      k++;
+    }
+    if (!this.direct) {
+      return decryptMessage.split('').reverse().join('');
+    }
+    return decryptMessage;
+  }
+
+  repeatString(key, message) {
+    while (key.length < message.length) {
+      key = key.concat(key);
+    }
+    return key;
+  }
+
 }
 
 module.exports = {
